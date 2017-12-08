@@ -1,9 +1,8 @@
 package edu.orangecoastcollege.cs273.occofficehours;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -12,17 +11,18 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
-//import android.widget.ThemedSpinnerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static edu.orangecoastcollege.cs273.occofficehours.R.id.offeringsListView;
+//import android.widget.ThemedSpinnerAdapter;
 
 public class SearchByDepartmentActivity extends AppCompatActivity {
 
     private DBHelper db;
     private List<Instructor> allInstructorsList;
+
+
     private List<Department> allDepartmentsList;
     private List<Branching> allBranchingsList;
     private List<Branching> filteredBranchingsList;
@@ -42,7 +42,6 @@ public class SearchByDepartmentActivity extends AppCompatActivity {
         deleteDatabase(DBHelper.DATABASE_NAME);
         db = new DBHelper(this);
 
-        db.importDepartmentFromCSV("departments.csv");
         db.importInstructorsFromCSV("instructors2.csv");
 
         allBranchingsList = db.getAllBranchings();

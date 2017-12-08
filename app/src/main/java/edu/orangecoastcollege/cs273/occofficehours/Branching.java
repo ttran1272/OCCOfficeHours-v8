@@ -6,27 +6,12 @@ package edu.orangecoastcollege.cs273.occofficehours;
 
 public class Branching {
 
-    private int mId;
     private Department mDepartment;
     private Instructor mInstructor;
-
-    public Branching(int id, Department department, Instructor instructor) {
-        mId = id;
-        mDepartment = department;
-        mInstructor = instructor;
-    }
 
     public Branching(Department department, Instructor instructor) {
         mDepartment = department;
         mInstructor = instructor;
-    }
-
-    public int getId() {
-        return mId;
-    }
-
-    public void setId(int id) {
-        mId = id;
     }
 
     public Department getDepartment() {

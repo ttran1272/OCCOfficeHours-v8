@@ -19,6 +19,7 @@ public class SearchByInstructorActivity extends AppCompatActivity {
 
     private DBHelper db;
     private List<Instructor> allInstructorsList;
+
     private List<Offering> allOfferingsList;
     private List<Offering> filteredOfferingsList;
     private OfferingListAdapter offeringListAdapter;
@@ -39,7 +40,6 @@ public class SearchByInstructorActivity extends AppCompatActivity {
         db.importCoursesFromCSV("courses.csv");
         db.importInstructorsFromCSV("instructors.csv");
         db.importOfferingsFromCSV("offerings.csv");
-        //db.importBranchingsFromCSV("branchings.csv");
 
         allOfferingsList = db.getAllOfferings();
         filteredOfferingsList = new ArrayList<>(allOfferingsList);

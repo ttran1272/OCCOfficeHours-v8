@@ -57,8 +57,12 @@ class DBHelper extends SQLiteOpenHelper {
     private static final String FIELD_COURSE_ID = "course_id";
     private static final String FIELD_INSTRUCTOR_ID = "instructor_id";
 
+    // TASK: DEFINE THE FIELDS (COLUMN NAMES) FOR THE DEPARTMENT TABLE
+    public static final String DEPARTMENT_TABLE = "Departments";
+    private static final String DEPARTMENT_KEY_FIELD_ID = "_id";
+    private static final String FIELD_DEPARTMENT_NAME = "department_name";
 
-    // TASK: DEFINE THE FIELDS (COLUMN NAMES) FOR THE BRANCHING_LIST TABLE
+    // TASK: DEFINE THE FIELDS (COLUMN NAMES) FOR THE BRANCHING TABLE
     public static final String BRANCHINGS_TABLE = "Branchings";
     private static final String FIELD_DEPARTMENT_ID = "department_id";
     private static final String FIELD_DEPARTMENT_INSTRUCTOR__ID = "instructor_id";
@@ -96,14 +100,6 @@ class DBHelper extends SQLiteOpenHelper {
                 + FIELD_F_HOURS + " TEXT" + ")";
         database.execSQL(createQuery);
 
-        /*
-        // Write the query to create the table "Department"
-        createQuery = "CREATE TABLE " + DEPARTMENT_TABLE + "("
-                + DEPARTMENT_KEY_FIELD_ID + " INTEGER PRIMARY KEY, "
-                + FIELD_DEPARTMENT_NAME + " TEXT)";
-        database.execSQL(createQuery);
-        */
-
         //TODO:  Write the query to create the relationship table "Offerings"
         //TODO:  Make sure to include foreign keys to the Courses, Departments, and Instructors tables
         createQuery = "CREATE TABLE " + OFFERINGS_TABLE + "("
@@ -115,11 +111,27 @@ class DBHelper extends SQLiteOpenHelper {
                 + COURSES_TABLE + "(" + COURSES_KEY_FIELD_ID + "), "
                 + "FOREIGN KEY(" + FIELD_INSTRUCTOR_ID + ") REFERENCES "
                 + INSTRUCTORS_TABLE + "(" + INSTRUCTORS_KEY_FIELD_ID + "))";
-                //+ "FOREIGN KEY(" + FIELD_DEPARTMENT_ID + ") REFERENCES "
-                //+ DEPARTMENT_TABLE + "(" + DEPARTMENT_KEY_FIELD_ID + "))";
 
         database.execSQL(createQuery);
 
+        //TODO:  Write the query to create the table "Departments"
+        createQuery = "CREATE TABLE " + DEPARTMENT_TABLE + "("
+                + DEPARTMENT_KEY_FIELD_ID + " INTEGER, "
+                + FIELD_DEPARTMENT_NAME + " TEXT " + ")";
+
+        database.execSQL(createQuery);
+
+        //TODO:  Write the query to create the relationship table "Branchings"
+        //TODO:  Make sure to include foreign keys to the Departments, and Instructors tables
+        createQuery = "CREATE TABLE " + BRANCHINGS_TABLE + "("
+                + FIELD_DEPARTMENT_ID + " INTEGER, "
+                + FIELD_INSTRUCTOR_ID + " INTEGER, "
+                + "FOREIGN KEY(" + FIELD_DEPARTMENT_ID + ") REFERENCES "
+                + DEPARTMENT_TABLE + "(" + DEPARTMENT_KEY_FIELD_ID + "), "
+                + "FOREIGN KEY(" + FIELD_INSTRUCTOR_ID + ") REFERENCES "
+                + INSTRUCTORS_TABLE + "(" + INSTRUCTORS_KEY_FIELD_ID + "))";
+
+        database.execSQL(createQuery);
     }
 
     @Override
@@ -128,7 +140,6 @@ class DBHelper extends SQLiteOpenHelper {
                           int newVersion) {
         database.execSQL("DROP TABLE IF EXISTS " + COURSES_TABLE);
         database.execSQL("DROP TABLE IF EXISTS " + INSTRUCTORS_TABLE);
-        //database.execSQL("DROP TABLE IF EXISTS " + DEPARTMENT_TABLE);
         database.execSQL("DROP TABLE IF EXISTS " + OFFERINGS_TABLE);
 
         //TODO:  Drop the Offerings table
@@ -136,6 +147,21 @@ class DBHelper extends SQLiteOpenHelper {
     }
 
     //********** COURSE TABLE OPERATIONS:  ADD, GETALL, EDIT, DELETE
+
+    public void addCourse(Course course) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(FIELD_ALPHA, course.getAlpha());
+        values.put(FIELD_NUMBER, course.getNumber());
+        values.put(FIELD_TITLE, course.getTitle());
+
+        db.insert(COURSES_TABLE, null, values);
+
+        // CLOSE THE DATABASE CONNECTION
+        db.close();
+    }
+
 
     public List<Course> getAllCourses() {
         List<Course> coursesList = new ArrayList<>();
@@ -161,6 +187,34 @@ class DBHelper extends SQLiteOpenHelper {
         cursor.close();
         database.close();
         return coursesList;
+    }
+
+    public void deleteCourse(Course course) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // DELETE THE TABLE ROW
+        db.delete(COURSES_TABLE, COURSES_KEY_FIELD_ID + " = ?",
+                new String[]{String.valueOf(course.getId())});
+        db.close();
+    }
+
+    public void deleteAllCourses() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(COURSES_TABLE, null, null);
+        db.close();
+    }
+
+    public void updateCourse(Course course) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(FIELD_ALPHA, course.getAlpha());
+        values.put(FIELD_NUMBER, course.getNumber());
+        values.put(FIELD_TITLE, course.getTitle());
+
+        db.update(COURSES_TABLE, values, COURSES_KEY_FIELD_ID + " = ?",
+                new String[]{String.valueOf(course.getId())});
+        db.close();
     }
 
 
@@ -189,6 +243,29 @@ class DBHelper extends SQLiteOpenHelper {
 
 
     //********** INSTRUCTOR TABLE OPERATIONS:  ADD, GETALL, EDIT, DELETE
+
+    public void addInstructor(Instructor instructor) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(FIELD_LAST_NAME, instructor.getLastName());
+        values.put(FIELD_FIRST_NAME, instructor.getFirstName());
+        values.put(FIELD_EMAIL, instructor.getEmail());
+        values.put(FIELD_DEPARTMENT, instructor.getDepartment());
+        values.put(FIELD_BUILDING,instructor.getBuilding());
+        values.put(FIELD_ROOM,instructor.getRoom());
+        values.put(FIELD_M_HOURS,instructor.getMonday());
+        values.put (FIELD_T_HOURS,instructor.getTuesday());
+        values.put(FIELD_W_HOURS,instructor.getWednesday());
+        values.put(FIELD_R_HOURS,instructor.getThursday());
+        values.put(FIELD_F_HOURS,instructor.getFriday());
+
+
+        db.insert(INSTRUCTORS_TABLE, null, values);
+
+        // CLOSE THE DATABASE CONNECTION
+        db.close();
+    }
 
     public List<Instructor> getAllInstructors() {
         List<Instructor> instructorsList = new ArrayList<>();
@@ -224,6 +301,41 @@ class DBHelper extends SQLiteOpenHelper {
         return instructorsList;
     }
 
+    public void deleteInstructor(Instructor instructor) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // DELETE THE TABLE ROW
+        db.delete(INSTRUCTORS_TABLE, INSTRUCTORS_KEY_FIELD_ID + " = ?",
+                new String[]{String.valueOf(instructor.getId())});
+        db.close();
+    }
+
+    public void deleteAllInstructors() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(INSTRUCTORS_TABLE, null, null);
+        db.close();
+    }
+
+    public void updateInstructor(Instructor instructor) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(FIELD_FIRST_NAME, instructor.getFirstName());
+        values.put(FIELD_LAST_NAME, instructor.getLastName());
+        values.put(FIELD_EMAIL, instructor.getEmail());
+        values.put(FIELD_DEPARTMENT, instructor.getDepartment());
+        values.put(FIELD_BUILDING,instructor.getBuilding());
+        values.put(FIELD_ROOM,instructor.getRoom());
+        values.put(FIELD_M_HOURS,instructor.getMonday());
+        values.put (FIELD_T_HOURS,instructor.getTuesday());
+        values.put(FIELD_W_HOURS,instructor.getWednesday());
+        values.put(FIELD_R_HOURS,instructor.getThursday());
+        values.put(FIELD_F_HOURS,instructor.getFriday());
+
+        db.update(INSTRUCTORS_TABLE, values, INSTRUCTORS_KEY_FIELD_ID + " = ?",
+                new String[]{String.valueOf(instructor.getId())});
+        db.close();
+    }
 
     public Instructor getInstructor(long id) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -305,6 +417,20 @@ class DBHelper extends SQLiteOpenHelper {
     //TODO:  deleteAllOfferings, updateOffering, and getOffering
     //TODO:  Use the Courses and Instructors methods above as a guide.
 
+    public void addOffering(int crn, int semesterCode, long courseId, long instructorId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(FIELD_CRN, crn);
+        values.put(FIELD_SEMESTER_CODE, semesterCode);
+        values.put(FIELD_COURSE_ID, courseId);
+        values.put(FIELD_INSTRUCTOR_ID, instructorId);
+
+        db.insert(OFFERINGS_TABLE, null, values);
+
+        // CLOSE THE DATABASE CONNECTION
+        db.close();
+    }
 
     public ArrayList<Offering> getAllOfferings() {
         ArrayList<Offering> offeringsList = new ArrayList<>();
@@ -332,6 +458,57 @@ class DBHelper extends SQLiteOpenHelper {
         return offeringsList;
     }
 
+    public void deleteOffering(Offering offering) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // DELETE THE TABLE ROW
+        db.delete(OFFERINGS_TABLE, FIELD_CRN + " = ?",
+                new String[]{String.valueOf(offering.getCRN())});
+        db.close();
+    }
+
+    public void deleteAllOfferings() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(OFFERINGS_TABLE, null, null);
+        db.close();
+    }
+
+    public void updateOffering(Offering offering) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(FIELD_SEMESTER_CODE, offering.getSemesterCode());
+        values.put(FIELD_COURSE_ID, offering.getCourse().getId());
+        values.put(FIELD_INSTRUCTOR_ID, offering.getInstructor().getId());
+
+        db.update(OFFERINGS_TABLE, values, FIELD_CRN + " = ?",
+                new String[]{String.valueOf(offering.getCRN())});
+        db.close();
+    }
+
+    public Offering getOffering(int crn) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(
+                OFFERINGS_TABLE,
+                new String[]{FIELD_CRN, FIELD_SEMESTER_CODE, FIELD_COURSE_ID, FIELD_INSTRUCTOR_ID},
+                FIELD_CRN + "=?",
+                new String[]{String.valueOf(crn)},
+                null, null, null, null);
+
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        Course course = getCourse(cursor.getLong(2));
+        Instructor instructor = getInstructor(cursor.getLong(3));
+        Offering offering = new Offering(cursor.getInt(0),
+                cursor.getInt(1), course, instructor);
+
+        cursor.close();
+        db.close();
+        return offering;
+    }
+
+    //********** BRANCHING TABLE OPERATIONS:  GETALL
 
     public ArrayList<Branching> getAllBranchings() {
         ArrayList<Branching> branchingsList = new ArrayList<>();
@@ -384,6 +561,8 @@ class DBHelper extends SQLiteOpenHelper {
                 String alpha = fields[1].trim();
                 String number = fields[2].trim();
                 String title = fields[3].trim();
+                addCourse(new Course(id, alpha, number, title));
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -424,6 +603,8 @@ class DBHelper extends SQLiteOpenHelper {
                 String friday = fields[11].trim();
 
                 //Log.i("Name: ", ""+firstName);
+                addInstructor(new Instructor(id, lastName, firstName, email, departments,building,room,monday,tuesday,wednesday,thursday,friday));
+
 
             }
         } catch (IOException e) {
@@ -455,35 +636,7 @@ class DBHelper extends SQLiteOpenHelper {
                 int semesterCode = Integer.parseInt(fields[1].trim());
                 long courseId = Long.parseLong(fields[2].trim());
                 long instructorId = Long.parseLong(fields[3].trim());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-
-    public boolean importDepartmentFromCSV(String csvFileName) {
-        AssetManager am = mContext.getAssets();
-        InputStream inStream = null;
-        try {
-            inStream = am.open(csvFileName);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        BufferedReader buffer = new BufferedReader(new InputStreamReader(inStream));
-        String line;
-        try {
-            while ((line = buffer.readLine()) != null) {
-                String[] fields = line.split(",");
-                if (fields.length != 2) {
-                    Log.d("OCC Office Hours", "Skipping Bad CSV Row: " + Arrays.toString(fields));
-                    continue;
-                }
-                int departmentId = Integer.parseInt(fields[0].trim());
-                String departmentName = fields[1].trim();
+                addOffering(crn, semesterCode, courseId, instructorId);
 
             }
         } catch (IOException e) {
@@ -492,6 +645,7 @@ class DBHelper extends SQLiteOpenHelper {
         }
         return true;
     }
+
 
     public boolean importBranchingsFromCSV(String csvFileName) {
         AssetManager am = mContext.getAssets();
@@ -513,6 +667,7 @@ class DBHelper extends SQLiteOpenHelper {
                 }
                 int departmentId = Integer.parseInt(fields[0].trim());
                 long instructorId = Long.parseLong(fields[1].trim());
+
 
             }
         } catch (IOException e) {
